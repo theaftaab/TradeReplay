@@ -1,0 +1,13 @@
+/Data/TrainingData.csv
+tradebook.csv
+.idea/
+
+# Byte-compiled / caches
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
