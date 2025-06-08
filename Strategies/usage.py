@@ -34,7 +34,7 @@ class MomentumStrategy(DecisionStrategy):
                     session.portfolio.sell(sym, prices[-1], group["date"].iloc[0], quantity=1)
 
 # %% parameters
-DATA_PATH  = "Data/TrainingData.csv"
+DATA_PATH  = "../Data/TrainingData.csv"
 START_DATE = datetime(2012,1,2)
 END_DATE   = datetime(2012,6,30)
 

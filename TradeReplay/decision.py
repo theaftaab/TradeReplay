@@ -1,7 +1,10 @@
-class DecisionStrategy:
-    def decide(self, row):
+from abc import ABC, abstractmethod
+
+class DecisionStrategy(ABC):
+    @abstractmethod
+    def decide(self, session, daily_df):
         """
-        row: dict or pd.Series containing a single row of OHLCV data
-        Returns: 'BUY', 'SELL', or 'HOLD'
+        Examine today's `daily_df` for the given `session` and
+        execute any buys or sells via session.portfolio.
         """
-        raise NotImplementedError("User must implement the decision logic.")
+        pass
