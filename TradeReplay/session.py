@@ -1,3 +1,5 @@
+# File: TradeReplay/session.py
+from tqdm import tqdm
 from TradeReplay.data_loader import DataLoader
 from TradeReplay.portfolio import Portfolio
 from TradeReplay.tradebook import TradeBook
@@ -12,12 +14,10 @@ class Session:
         brokerage=0.0005,
         investment=100_000
     ):
-        # initialize data loader and date range
         self.loader = DataLoader(data_path)
         self.current = start_date or self.loader.get_min_date()
         self.end_date = end_date or self.loader.get_max_date()
 
-        # initialize tradebook and portfolio
         self.tradebook = TradeBook()
         self.portfolio = Portfolio(
             initial_cash=investment,
@@ -25,24 +25,28 @@ class Session:
             tradebook=self.tradebook
         )
 
-        # initialize indicator engine
         self.indicator_engine = IndicatorEngine(self.loader)
 
     def run(self, strategy):
         """
-        Execute the strategy over the date range, calling decide() each day.
-        Precomputes all indicators the strategy registers before iterating.
+        Execute the strategy over the date range with a tqdm progress bar.
         """
-        # let the strategy register required indicators
+        # 1) Register & compute indicators
         strategy.register_indicators(self.indicator_engine)
-        # compute each indicator once, vectorized across symbols and dates
         self.indicator_engine.compute_all()
 
-        # day-by-day simulation
-        while self.current and self.current <= self.end_date:
-            daily_df = self.loader.get_data_for_date(self.current)
-            strategy.decide(self, daily_df)
-            self.current = self.loader.get_next_date(self.current)
+        # 2) Build the list of dates to iterate
+        all_dates = []
+        d = self.current
+        while d and d <= self.end_date:
+            all_dates.append(d)
+            d = self.loader.get_next_date(d)
 
-        # write out recorded trades
+        # 3) Loop with tqdm
+        for today in tqdm(all_dates, desc="Backtest Progress", unit="day"):
+            self.current = today
+            daily_df = self.loader.get_data_for_date(today)
+            strategy.decide(self, daily_df)
+
+        # 4) Save trades
         self.tradebook.save()

@@ -81,7 +81,10 @@ class IndicatorEngine:
                 )
 
         # update loader's DataFrame in place
+
+        self.loader.df.to_csv("Data/Final_DF.csv", index=False)
         self.loader.df = df
+
 
     def get(self, symbol: str, date, column: str):
         """

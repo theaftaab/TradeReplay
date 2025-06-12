@@ -1,7 +1,7 @@
 import csv
 
 class TradeBook:
-    def __init__(self, filepath='tradebook.csv'):
+    def __init__(self, filepath='Data/tradebook.csv'):
         self.filepath = filepath
         self.trades = []
 

@@ -33,6 +33,11 @@ class Portfolio:
             cash_after=cash_after,
             invested_after=invested_after
         )
+    def has_position(self, symbol: str) -> bool:
+        """
+        Returns True if we currently hold >0 shares of `symbol`.
+        """
+        return symbol in self.holdings and self.holdings[symbol]['quantity'] > 0
 
     def buy(self, symbol: str, price: float, date, quantity: int):
         if quantity <= 0:
