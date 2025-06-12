@@ -15,13 +15,10 @@ Backtesting-Framework/
 │   ├── indicators.py       # TA-Lib registration and compute
 │   ├── portfolio.py        # Portfolio & P&L tracking
 │   ├── tradebook.py        # Trade logging
-│   └── session.py          # Backtest orchestration (with tqdm)
+│   └── session.py          # Backtest orchestration (with tqdm + progress bar)
 ├── run.py                  # Example driver: instantiate Session + Strategy
 ├── requirements.txt        # Python dependencies (pandas, TA-Lib, tqdm, etc.)
 └── .gitignore              # Ignore Data/, virtual env, caches, etc.
-
-
-⸻
 
 How It Works (Current)
 	1.	DataLoader reads your time-series CSV, parses dates, renames columns, and exposes helper methods:
