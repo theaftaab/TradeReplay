@@ -2,24 +2,6 @@ Backtesting Framework
 
 A lightweight, extensible Python backtesting library that handles data loading, indicator computation, portfolio management, and strategy execution. It uses TA-Lib under the hood for technical indicators and logs all trades to a CSV tradebook.
 
-⸻
-
-Repository Structure
-
-Backtesting-Framework/
-├── Data/                   # (ignored by Git) raw and intermediate CSV files
-├── Strategies/             # User-defined strategy classes
-│   └── EMACrossoverStrategy.py
-├── TradeReplay/            # Core engine modules
-│   ├── data_loader.py      # CSV loader, date navigation
-│   ├── indicators.py       # TA-Lib registration and compute
-│   ├── portfolio.py        # Portfolio & P&L tracking
-│   ├── tradebook.py        # Trade logging
-│   └── session.py          # Backtest orchestration (with tqdm + progress bar)
-├── run.py                  # Example driver: instantiate Session + Strategy
-├── requirements.txt        # Python dependencies (pandas, TA-Lib, tqdm, etc.)
-└── .gitignore              # Ignore Data/, virtual env, caches, etc.
-
 How It Works (Current)
 	1.	DataLoader reads your time-series CSV, parses dates, renames columns, and exposes helper methods:
 	•	get_data_for_date(date)
