@@ -1,62 +1,106 @@
+import pandas as pd
+
 class IndicatorEngine:
+    """
+    Precompute and attach TA-Lib indicators as new columns in loader.df
+    so each indicator is calculated only once per symbol across all dates.
+    """
     def __init__(self, loader, custom_indicators=None):
         self.loader = loader
         self.custom = custom_indicators or {}
-        self._cache = {}  # <-- simple in‐memory cache
+        self._indicators = {}  # mapping: column_name -> (function, params dict)
 
+        # try importing TA-Lib
         try:
             import talib
             self._talib = talib
         except ImportError:
-            self._talib = None
+            raise ImportError(
+                "TA-Lib is required. Please install it with `pip install TA-Lib`"
+            )
 
-    def register(self, name: str, func):
-        """User calls this to add their own indicator."""
-        self.custom[name.lower()] = func
+    def register_talib(self, name: str, **params) -> str:
+        """
+        Registers a TA-Lib indicator to be computed.
 
-    def _get_history(self, symbol, date, window):
-        df_sym = (
-            self.loader.df
-            .loc[lambda d: (d.instrument == symbol) & (d.date <= date)]
-            .sort_values("date")
-        )
-        # last `window` closes
-        return df_sym["close"].iloc[-window:]
+        Args:
+            name: Name of the indicator (e.g., 'EMA', 'SMA', 'MACD', 'OBV').
+            params: Keyword arguments expected by the TA-Lib function (e.g., timeperiod=14).
 
-    def sma(self, symbol: str, date, window: int) -> float:
-        key = ("sma", symbol, date, window)
-        if key in self._cache:
-            return self._cache[key]
+        Returns:
+            The column name under which values will be stored.
+        """
+        fn = getattr(self._talib, name.upper(), None)
+        if fn is None:
+            raise AttributeError(f"TA-Lib has no indicator named '{name}'")
 
-        closes = self._get_history(symbol, date, window)
-        val = closes.mean()
-        self._cache[key] = val
-        return val
+        # build unique column name based on params
+        if params:
+            param_str = "_".join(f"{k}{v}" for k, v in sorted(params.items()))
+            col = f"{name.lower()}_{param_str}"
+        else:
+            col = name.lower()
 
-    def ema(self, symbol: str, date, window: int) -> float:
-        key = ("ema", symbol, date, window)
-        if key in self._cache:
-            return self._cache[key]
+        self._indicators[col] = (fn, params)
+        return col
 
-        closes = self._get_history(symbol, date, window)
-        val = closes.ewm(span=window, adjust=False).mean().iloc[-1]
-        self._cache[key] = val
-        return val
+    def register_custom(self, name: str, func) -> str:
+        """
+        Registers a custom indicator function.
+
+        Args:
+            name: Desired column name for the indicator.
+            func: A function accepting a pandas Series of closes and returning a sequence.
+
+        Returns:
+            The column name under which values will be stored.
+        """
+        col = name.lower()
+        self._indicators[col] = (func, None)
+        return col
+
+    def compute_all(self):
+        """
+        Compute all registered indicators for every symbol and attach as columns.
+        Must be called once after registering all desired indicators.
+        """
+        df = self.loader.df
+
+        for col, (fn, params) in self._indicators.items():
+            if params is not None:
+                # TA-Lib functions expect numpy arrays and named params
+                df[col] = (
+                    df.groupby('instrument')['close']
+                      .transform(lambda x: fn(x.values, **params))
+                )
+            else:
+                # custom functions take pandas Series
+                df[col] = (
+                    df.groupby('instrument')['close']
+                      .transform(lambda x: fn(x))
+                )
+
+        # update loader's DataFrame in place
+        self.loader.df = df
+
+    def get(self, symbol: str, date, column: str):
+        """
+        Retrieve a precomputed indicator value for a given symbol and date.
+        Returns None if not found.
+        """
+        row = self.loader.df.loc[
+            (self.loader.df['instrument'] == symbol) &
+            (self.loader.df['date'] == date)
+        ]
+        if row.empty or column not in row:
+            return None
+        return float(row[column].iloc[0])
 
     def __getattr__(self, name):
-        # allow custom or TA-Lib indicators, but *do not* cache them automatically
+        """
+        Allow dynamic access to custom indicator functions registered via register_custom().
+        """
         name_low = name.lower()
         if name_low in self.custom:
-            fn = self.custom[name_low]
-            return lambda symbol, date, *args, window, **kwargs: fn(
-                self._get_history(symbol, date, window), *args, **kwargs
-            )
-        if self._talib and hasattr(self._talib, name.upper()):
-            talib_fn = getattr(self._talib, name.upper())
-            return lambda symbol, date, timeperiod, *args, **kwargs: talib_fn(
-                self._get_history(symbol, date, timeperiod).values,
-                timeperiod,
-                *args,
-                **kwargs
-            )[-1]
-        raise AttributeError(f"No indicator named {name!r} found")
+            return self.custom[name_low]
+        raise AttributeError(f"No precomputed indicator named '{name}'")
