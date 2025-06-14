@@ -3,3 +3,9 @@ pandas
 numpy
 matplotlib
 tqdm
+pyfolio
+empyrical
+pandas-datareader
+scipy
+seaborn
+plotly

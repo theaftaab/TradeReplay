@@ -6,7 +6,7 @@ from Strategies.EMACrossoverShift import EMACrossoverStrategy
 if __name__ == "__main__":
     DATA_PATH  = "Data/TrainingData.csv"
     START_DATE = datetime(2012, 1, 2)
-    END_DATE   = datetime(2012, 6, 30)
+    END_DATE   = datetime(2017, 6, 30)
 
     sess = Session(
         data_path  = DATA_PATH,
