@@ -1,6 +1,15 @@
-# Backtesting Framework
+# TradeReplay - Simplified Trading Strategy Backtesting Framework
 
-A lightweight, extensible Python backtesting library that handles data loading, indicator computation, portfolio management, and strategy execution. It uses TA-Lib under the hood for technical indicators and logs all trades to a CSV tradebook.
+TradeReplay is designed to make trading strategy testing accessible to financial analysts, allowing them to focus on strategy development while the framework handles all the complex optimizations in the background.
+
+## 🎯 Vision
+
+Most financial analysts excel at developing trading strategies but may not have expertise in advanced topics like GPU utilization, multiprocessing, or memory optimization. TradeReplay aims to bridge this gap by:
+
+1. **Simple Strategy Definition**: Write strategies as simple Python scripts without worrying about system-level optimizations
+2. **Automatic Optimizations**: The framework handles GPU acceleration, parallel processing, and memory management internally
+3. **Focus on Strategy**: Analysts can concentrate on their trading logic while the framework takes care of performance
+4. **Built-in Analytics**: Comprehensive performance metrics and visualizations without additional coding
 
 ---
 
@@ -83,16 +92,37 @@ Backtesting-Framework/
 
 ---
 
-##  Future Scope
+## 🚀 Future Enhancements
 
-- **Parallel computation** of indicators (via joblib, Dask, or Ray) and per-symbol backtests for speed up across CPU cores.
-- **GPU support** and RAPIDS/cuDF integration for massive-data workloads.
-- **Built-in analytics & metrics**: Sharpe ratio, drawdown, VAMI, trade statistics, and visualization.
-- **Pluggable data sources**: support for SQL, Parquet, live API feeds, and parquet partitions.
-- **Strategy registry & CLI**: configure and run multiple strategies from a command-line interface or YAML/JSON config.
-- **Publisher-subscriber hooks**: allow real-time event streaming into external systems (Dashboards, Slack alerts, etc.).
-- **Packaging**: distribute as a pip-installable library with versioned releases and unit tests.
-- **Live trading adapter**: connect signals to execution gateways (e.g., Interactive Brokers, Alpaca) for paper or real trades.
+1. **Smart Optimizations**
+   - Automatic GPU acceleration for heavy computations
+   - Intelligent multiprocessing for parallel strategy execution
+   - Memory-efficient data handling
+   - Cache optimization for frequently accessed data
+
+2. **Enhanced Analytics**
+   - Comprehensive performance metrics
+   - Risk management tools
+   - Portfolio optimization
+   - Correlation analysis
+
+3. **Data Integration**
+   - Multiple data source support
+   - Real-time data feeds
+   - Historical data integration
+   - Custom data preprocessing
+
+4. **User Experience**
+   - Strategy registry and management
+   - Interactive visualization tools
+   - Real-time monitoring
+   - Strategy comparison and benchmarking
+
+5. **Enterprise Features**
+   - Team collaboration tools
+   - Strategy version control
+   - Performance reporting
+   - Integration with trading platforms
 
 ---
 
