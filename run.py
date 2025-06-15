@@ -36,3 +36,5 @@ if __name__ == "__main__":
         for _, row in sess.loader.get_data_for_date(END_DATE).iterrows()
     }
     print("Final portfolio value:", sess.portfolio.total_value(last_prices))
+
+    #testing who is commiting on my behalf
