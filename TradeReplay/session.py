@@ -52,6 +52,25 @@ class Session:
             multiprocessing: Whether to use multiprocessing (default: False)
             num_processes: Number of processes to use (default: None, uses all available cores)
         """
+        raise NotImplementedError("Run method should be implemented in child classes")
+
+
+class SessionChunk(Session):
+    def __init__(self, data_path, start_date=None, end_date=None, brokerage=0.0005,
+                 investment=100_000, symbols=None):
+        super().__init__(data_path, start_date, end_date, brokerage, investment)
+        self.symbols = symbols or []
+
+    def run(self, strategy):
+        """
+        Execute the strategy over the date range for the assigned symbols.
+        
+        Args:
+            strategy: The trading strategy to execute
+            
+        Returns:
+            DataFrame with results
+        """
         # 1) Register & compute indicators if not already done
         df = self.prepare_indicators(strategy)
 
@@ -62,11 +81,15 @@ class Session:
             all_dates.append(d)
             d = self.loader.get_next_date(d)
 
-        # 3) Loop with tqdm
+        # 3) Loop through dates and symbols with tqdm
         for today in tqdm(all_dates, desc="Backtest Progress", unit="day"):
             self.current = today
-            daily_df = self.loader.get_data_for_date(today)
-            strategy.decide(self, daily_df)
+            
+            # Process each symbol for this date
+            for symbol in self.symbols:
+                daily_df = self.loader.get_data_for_date(today, symbol)
+                if daily_df is not None and not daily_df.empty:
+                    strategy.decide(self, daily_df)
 
         # 4) Save trades
         self.tradebook.save()

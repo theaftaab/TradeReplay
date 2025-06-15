@@ -25,7 +25,7 @@ if __name__ == "__main__":
     )
     # 3) Run the backtest and get final DataFrame
     df = sess.run(strat)
-    df.to_csv("data_with_indicators.csv", index=False)
+    df.to_csv("backtest_results.csv", index=False)
 
     # 4) inspect trades and final P&L as before
     trades_df = pd.read_csv(sess.tradebook.filepath, parse_dates=["date"])
