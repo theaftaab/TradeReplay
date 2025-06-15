@@ -9,4 +9,4 @@ __pycache__/
 .ipynb_checkpoints/
 
 # macOS
-.DS_Store
+.DS_Storedata_with_indicators.csv

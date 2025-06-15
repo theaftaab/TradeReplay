@@ -27,13 +27,33 @@ class Session:
 
         self.indicator_engine = IndicatorEngine(self.loader)
 
-    def run(self, strategy):
+    def prepare_indicators(self, strategy):
+        """
+        Register and compute indicators for the strategy.
+        
+        Args:
+            strategy: The trading strategy
+            
+        Returns:
+            DataFrame with indicators
+        """
+        if not hasattr(self, 'indicators_prepared'):
+            strategy.register_indicators(self.indicator_engine)
+            self.indicator_engine.compute_all()
+            self.indicators_prepared = True
+        return self.loader.df
+
+    def run(self, strategy, multiprocessing=False, num_processes=None):
         """
         Execute the strategy over the date range with a tqdm progress bar.
+        
+        Args:
+            strategy: The trading strategy to execute
+            multiprocessing: Whether to use multiprocessing (default: False)
+            num_processes: Number of processes to use (default: None, uses all available cores)
         """
-        # 1) Register & compute indicators
-        strategy.register_indicators(self.indicator_engine)
-        self.indicator_engine.compute_all()
+        # 1) Register & compute indicators if not already done
+        df = self.prepare_indicators(strategy)
 
         # 2) Build the list of dates to iterate
         all_dates = []
@@ -50,3 +70,6 @@ class Session:
 
         # 4) Save trades
         self.tradebook.save()
+        
+        # Return the final DataFrame with indicators
+        return self.loader.df
